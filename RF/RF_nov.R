@@ -37,10 +37,11 @@ for(momento in w){
   
   df <- data.frame(data[,3:ncol(data)])
 
-  #One can optimize the parameters with the whole sample and then fixed them
+  #One can optimize the parameters with the whole sample and then fixed them. 
   #The optimization at every period was tested that didn't improve results
+  #since the sample is small, we train with the whole sample
   
-  #Random Search   #sale 50 mtry el ?ptimo con 2000 arboles
+  #Random Search  
   # seed <- 7
   # control <- trainControl(method="repeatedcv", number=10, repeats=3, search="random")
   # set.seed(seed)
@@ -56,6 +57,7 @@ for(momento in w){
   #   }
   # }
   
+  #The different configurations for more than mmtry=35 barely change RMSE, we used 48,200 and 5. In case mtry higher than dimension, it resets to a valid range
   #model backcast t+1
   RF.tree=randomForest(Hom~., data = df,mtry=48, ntree=200, nodesize = 5)
     
@@ -75,7 +77,8 @@ for(momento in w){
   RF.tree_v2=randomForest(Hom~., data = df_v2,mtry=48, ntree=200, nodesize = 5)
   RF.tree_v3=randomForest(Hom~., data = df_v3,mtry=48, ntree=200, nodesize = 5)
   RF.tree_v4=randomForest(Hom~., data = df_v4,mtry=48, ntree=200, nodesize = 5)
-  #in this case we had to retrain, since there were less available series than previous cases
+  #in this case we had to retrain, since there were less available series than previous cases, so we fixed 39,1000 and 3
+  #again the differences throughout configurations is very small
   RF.tree_v5=randomForest(Hom~., data = df_v5,mtry=39, ntree=1000, nodesize = 3)
   
   
@@ -658,6 +661,7 @@ df_v2 <- subset(df, select = -c(Hom1,Hom2))
 df_v3 <- subset(df, select = -c(Hom1,Hom2,Hom3))
 
 df_v4 <- subset(df, select = -c(Hom1,Hom2,Hom3,Hom4))
+df_v4notri <- subset(df, select = -c(Hom1,Hom2,Hom3,Hom4,X1))  #configuration without quarterly imputed variable
 
 df_v5 <- subset(df, select = -c(Hom1,Hom2,Hom3,Hom4,X1,GA,MOH,H3,GTH,BCs,GTG,MOR,EPU,MOU,TW))
 
@@ -666,6 +670,7 @@ RF.tree_v1=randomForest(Hom~., data = df_v1,mtry=48, ntree=200, nodesize = 5)
 RF.tree_v2=randomForest(Hom~., data = df_v2,mtry=48, ntree=200, nodesize = 5)
 RF.tree_v3=randomForest(Hom~., data = df_v3,mtry=48, ntree=200, nodesize = 5)
 RF.tree_v4=randomForest(Hom~., data = df_v4,mtry=48, ntree=200, nodesize = 5)
+RF.tree_v4notri=randomForest(Hom~., data = df_v4notri,mtry=48, ntree=200, nodesize = 5)
 #in this case we had to retrain, since there were less available series than previous cases
 RF.tree_v5=randomForest(Hom~., data = df_v5,mtry=39, ntree=1000, nodesize = 3)
 
