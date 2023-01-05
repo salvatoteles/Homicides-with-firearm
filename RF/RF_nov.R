@@ -9,8 +9,52 @@ library(xgboost)
 library("readxl")
 require("writexl")
 library(randomForest)
-###################################33
 
+
+
+###################################(you can jump this part)
+#Let's first estimate optimization (not really needed, differences are very small)
+#One can optimize the parameters with the whole sample and then fixed them. 
+#The optimization at every period was tested that didn't improve results
+#since the sample is small, we train with the whole sample
+w <- c(1221)
+
+for(momento in w){
+
+  data0<-read_xlsx(paste0("datos_Monthly_Homicides_",momento,".xlsx"),sheet="Sheet1",col_names = TRUE) 
+  colnames(data0) <- c("date","X1","Hom","Hom1","Hom2","Hom3","Hom4",
+                       "GA","GA1","GA2","GA3","GA4",
+                       "MOH","MOH1","MOH2","MOH3","MOH4",
+                       "H3","H31","H32","H33","H34", 
+                       "GTH","GTH1","GTH2","GTH3","GTH4",
+                       "BCs","BCs1","BCs2","BCs3","BCs4","BCs5","BCs6","BCs7",
+                       "GTG","GTG1","GTG2","GTG3","GTG4",
+                       "MOR","MOR1","MOR2","MOR3","MOR4",
+                       "EPU","EPU1","EPU2","EPU3","EPU4",
+                       "MOU","MOU1","MOU2","MOU3","MOU4",
+                       "TW","TW1","TW2","TW3","TW4")
+  #data$X1 <- as.Date(data$X1)
+  data <- data0[min(which(data0$GA4 != 9.999900e+04)):max(which(data0$Hom != 9.999900e+04)),]
+  df <- data.frame(data[,3:ncol(data)])
+  #seed <- 7
+  control <- trainControl(method="repeatedcv", number=10, repeats=3, search="random")
+  # set.seed(seed)
+  metric <- "RMSE"
+  modellist <- list()
+  for (nodesize in c(3, 5,9,15)) {
+    for (ntree in c(100,200,500,1000)) {
+      rf_random <- train(Hom~., data=df, method="rf", metric=metric, tuneLength=20, trControl=control,ntree=ntree,nodesize=nodesize)
+      print(ntree)
+      print(nodesize)
+      print(subset(data.frame(rf_random[["results"]]),mtry==rf_random$bestTune$mtry))
+    }
+  }
+  #the different configurations for more than mmtry=35 barely change RMSE, we used 48,200 and 5 from the output. 
+  
+}
+
+#####################################################
+#Example estimations for the november months configurations
 w <- c(1109,1110,1111,1112) #due to cities var
 #w <- c(1113,1114,1115,1116)  #due to twitter var
 #w <- c(1117,1118,1119) #due to GA var
@@ -37,11 +81,9 @@ for(momento in w){
   
   df <- data.frame(data[,3:ncol(data)])
 
-  #One can optimize the parameters with the whole sample and then fixed them. 
-  #The optimization at every period was tested that didn't improve results
-  #since the sample is small, we train with the whole sample
-  
-  #Random Search  
+
+  #Random Search. We could again perform it, but we tested through paralell optimization at every period,
+  #that the results of the out-of-sample exercise were not improved, so we fixed the parameters with those from the whole sample
   # seed <- 7
   # control <- trainControl(method="repeatedcv", number=10, repeats=3, search="random")
   # set.seed(seed)
@@ -57,7 +99,7 @@ for(momento in w){
   #   }
   # }
   
-  #The different configurations for more than mmtry=35 barely change RMSE, we used 48,200 and 5. In case mtry higher than dimension, it resets to a valid range
+  #In case mtry of higher than dimension, it resets to a valid range
   #model backcast t+1
   RF.tree=randomForest(Hom~., data = df,mtry=48, ntree=200, nodesize = 5)
     
