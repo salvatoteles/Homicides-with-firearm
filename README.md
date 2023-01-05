@@ -1,5 +1,5 @@
 # Homicides-with-firearm
-This readme file will help you replicate the results in the paper titled "On the use of dynamic factor modeling to predict homicides with firearm in the United States"
+This readme file will help you replicate the results in the paper titled "A dynamic factor modeling to predict homicides with firearm in the United States"
 
 1. The extracted time series and the same series after their respective seasonal adjustment and detrending, are located in the file "time_series_original_y_sa_det-xlsx".
 A code with an example to get the latter is in the "deseason.R" file.
