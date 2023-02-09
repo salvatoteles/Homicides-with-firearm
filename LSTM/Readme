@@ -1,0 +1,6 @@
+Here you find an example of estimation with LSTM for the different configurations of a certain month, november, 
+to get the predictions that the approach will produced at every november.
+With "LSTM_nov_pre" estimations for november 2009,10,11 & 12 are performed, when Homicides for the three cities is the newest variable incorporated.
+With "LSTM_nov_med" estimtaions for november 2013,14,15 & 16 are performed, when the series from Twitter is the newest variable incorporated.
+With "LSTM_nov_post" estimtaions for november 2017,18 & 19 are performed, when the series from Guns Archive is the newest variable incorporated.
+With "LSTM_nov_post_X1" estimtaions for november 2020 & 21 are performed, when the series from Quarterly Provisional Estimate for Homicides is the newest variable incorporated.
