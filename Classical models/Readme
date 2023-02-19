@@ -1,0 +1,1 @@
+This folder contains the estimation of ARIMA, VAR and HW in sample, where the procedure to get out-of-sample results are explain. VARfill shows the procedure for the novermber months to make the estimations and forecast for the VAR model with the "fill" procedure
