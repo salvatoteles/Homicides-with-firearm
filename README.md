@@ -9,3 +9,5 @@ A code with an example to get the latter is in the "deseason.R" file.
 The code is set so that an out of sample exercise can be performed when the datasets are provided. A second database as in november 2021 can be found in the file "data_Monthly_Homicides_1121.xlsx" so the output with these two datasets can be obtained.
 
 3. The files "Forecasts_OUT_back_tri.xlsx", "Forecasts_OUT_now_tri.xlsx", and "DataForPTTest_tri.xlsx" summarize the forecasts that are passed to get the HLN test and the PT test. Those test can be done with the HLN.R" file.
+
+The same repositoty can be found at https://github.com/dynamicalsystemslaboratory/Homicides-with-firearm
