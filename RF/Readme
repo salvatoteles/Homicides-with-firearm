@@ -1,1 +1,2 @@
-Here you find an example of estimation with Random Forest for the different configurations of a certain month, november, to get the predictions that the approach will produced at every november.
+This folder allows to produce the out of sample estimations for one particular month across the years, as an example, with Random Forest. 
+In particular you find an script as an example of estimation with Random Forest for the different configurations of a certain month, november, to get the predictions that the approach will produced at every november.
