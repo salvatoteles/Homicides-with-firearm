@@ -121,10 +121,12 @@ ofn<-function(th2,Yv){    #optimization procedure based on Kalman
     beta11<-beta10+K%*%n10             # Updating equations 
     #Filter[it,]<<-t(beta11)
     Filter[it,]<-t(beta11)    #we feed to Filter at each period the result of the kalman filter. 
+    Filter_0[it,] <- t(beta10)   #to the the filter matrix at t|t+1
     #the optimization procedure will make that the final Filter will be with the optimized parameters
     P11<-P10-K%*%Hit%*%P10
     
     Filter2 <<-Filter   #we need to assign to be able to work with it outside the function
+    Filter2_0 <<- Filter_0
     
     beta00<-beta11    #and we update parameters in the periodic loop
     P00<-P11
@@ -233,7 +235,7 @@ options=list(maxit = 300 #depending on the method of optimization, different par
 res <- optim(par=startval,fn=ofn,Yv,gr=NULL,method="L-BFGS-B",hessian = FALSE,control=options)
 conv[which(w==momento)] <- res$convergence
 
-#Parametros convergence 
+#Parameters convergence 
 #Model 6 variables 2021M12
 
 #converged <- c(0.069,  0.345,  0.205,  0.164,  0.212,  0.103,  0.592,  0.387,
@@ -284,6 +286,45 @@ legend("topleft", legend=c("value", "common1","idiosyncratic"),
 fit2 <- lm(common1 ~ homm)  #we regress the factor with the series
 ajuste <- summary(fit2)
 ajuste$r.squared
+
+
+####################################################################
+#Proofs of normality
+ef <- Filter2[1:(dim(Filter2)[1]-12),1] - res$par[7]*Filter2[1:(dim(Filter2)[1]-12),2] - res$par[8]*Filter2[1:(dim(Filter2)[1]-12),3]
+#each factor has a different sample period. We need Filter0 for the quarterly variable, due to the missing values
+#e_u1 <- Filter2[219:(dim(Filter2)[1]-12),((qf+1) + 1)]-res$par[9]*Filter2[219:(dim(Filter2)[1]-12),((qf+1) + 2)]-res$par[10]*Filter2[219:(dim(Filter2)[1]-12),((qf+1) + 3)]
+e_u1_0_v2 <- Filter2_0[219:(dim(Filter2_0)[1]-12),((qf+1) + 1)]-res$par[9]*dplyr::lag(Filter2_0[219:(dim(Filter2_0)[1]-12),((qf+1) + 1)],1)-res$par[8]*dplyr::lag(Filter2_0[219:(dim(Filter2_0)[1]-12),((qf+1) + 1)],2)
+e_u1_0_v2 <- e_u1_0_v2[3:length(e_u1_0_v2)]
+e_u2 <- Filter2[1:(dim(Filter2)[1]-12),((qf+1) + 4)]-res$par[11]*Filter2[1:(dim(Filter2)[1]-12),((qf+1) + 5)]-res$par[12]*Filter2[1:(dim(Filter2)[1]-12),((qf+1) + 6)]
+e_u3 <- Filter2[180:(dim(Filter2)[1]-12),((qf+1) + 7)]-res$par[13]*Filter2[180:(dim(Filter2)[1]-12),((qf+1) + 8)]-res$par[14]*Filter2[180:(dim(Filter2)[1]-12),((qf+1) + 9)]
+e_u4 <- Filter2[1:(dim(Filter2)[1]-12-12),((qf+1) + 10)]-res$par[15]*Filter2[1:(dim(Filter2)[1]-12-12),((qf+1) + 11)]-res$par[16]*Filter2[1:(dim(Filter2)[1]-12-12),((qf+1) + 12)]
+e_u5 <- Filter2[85:(dim(Filter2)[1]-12),((qf+1) + 13)]-res$par[17]*Filter2[85:(dim(Filter2)[1]-12),((qf+1) + 14)]-res$par[18]*Filter2[85:(dim(Filter2)[1]-12),((qf+1) + 15)]
+e_u6 <- Filter2[8:(dim(Filter2)[1]-12),((qf+1) + 16)]-res$par[19]*Filter2[8:(dim(Filter2)[1]-12),((qf+1) + 17)]-res$par[20]*Filter2[8:(dim(Filter2)[1]-12),((qf+1) + 18)]
+
+ks.test(e_u1_0_v2,"pnorm",mean=mean(e_u1_0_v2),sd=sd(e_u1_0_v2)) #p<0.05 rejects normality. Change here the 
+library(tseries)
+library(nortest) 
+lillie.test(e_u1_0_v2)
+library(vsgoftest)
+vs.test(e_u1_0_v2,densfun='dnorm')
+library(EnvStats)
+dat.censored <- ef; censored <- dat.censored < -0.1|dat.censored > 0.1; dat.censored[censored] <- 0
+gof.list <- gofTestCensored(dat.censored, censored, test = "sf", distribution = "norm"); gof.list
+dat.censored <- e_u2; censored <- dat.censored < -0.1|dat.censored > 0.1; dat.censored[censored] <- 0
+gof.list <- gofTestCensored(dat.censored, censored, test = "sf", distribution = "norm"); gof.list
+dat.censored <- e_u3; censored <- dat.censored < -0.25|dat.censored > 0.25; dat.censored[censored] <- 0
+gof.list <- gofTestCensored(dat.censored, censored, test = "sf", distribution = "norm"); gof.list
+dat.censored <- e_u4; censored <- dat.censored < -1|dat.censored > 1; dat.censored[censored] <- 0
+gof.list <- gofTestCensored(dat.censored, censored, test = "sf", distribution = "norm"); gof.list
+dat.censored <- e_u5; censored <- dat.censored < -1.5|dat.censored > 1.5; dat.censored[censored] <- 0
+gof.list <- gofTestCensored(dat.censored, censored, test = "sf", distribution = "norm"); gof.list
+dat.censored <- e_u6; censored <- dat.censored < -0.4|dat.censored > 0.4; dat.censored[censored] <- 0
+gof.list <- gofTestCensored(dat.censored, censored, test = "sf", distribution = "norm"); gof.list
+
+#Ljung Box and Box Pierce for autocorrelation
+Box.test(e_u6_v2, lag = 1, type = "Box-Pierce")
+Box.test(e_u6_v2, lag = 1, type = "Ljung-Box")
+
 
 
 #############################################################
